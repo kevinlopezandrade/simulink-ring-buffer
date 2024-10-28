@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "ringbuffer.h"
+#include "checksum.h"
 
 static Message NULL_MSG = {.data = 0, .wait = true};
 
@@ -22,10 +23,14 @@ publish(RingBuffer* ring_buffer, float value)
     /* Pointer to the position to write. */
     Message* msg = &ring_buffer->buffer[wrapped_idx];
 
-    /* Write the value.
-    msg->data = ; */
-    memset(msg->data, 0, 1024 * 1024 * 3);
+    /* Write the value. */
+    msg->data = value;
+    // memset(msg->data, 0, 1024 * 1024);
     msg->wait = false;
+    
+    // msg->checksum = crc((unsigned char*) msg->data, sizeof(uint8_t[1024*1024]));
+    msg->checksum = crc((unsigned char*) &value, sizeof(float));
+
 
     /* Add timestamp. */
     clock_gettime(CLOCK_MONOTONIC, &msg->timestamp);

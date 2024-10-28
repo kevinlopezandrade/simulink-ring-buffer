@@ -13,8 +13,10 @@ typedef struct
 
 typedef struct
 {
-    uint8_t data[1024*1024*3];
+    // uint8_t data[1024*1024];
+    float data;
     bool wait;
+    unsigned long checksum;
     struct timespec timestamp;
 } Message;
 
