@@ -1,4 +1,4 @@
-#define S_FUNCTION_NAME timestwo 
+#define S_FUNCTION_NAME mmapwriter
 #define S_FUNCTION_LEVEL 2
 #include <sys/mman.h>
 #include <sys/stat.h>        /* For mode constants */
@@ -13,6 +13,8 @@
 
 #include "simstruc.h"
 #include "ringbuffer.h"
+
+// #include "cbor.h"
 
 
 #define MDL_START
@@ -75,8 +77,8 @@ mdlInitializeSizes(SimStruct *S)
     ssSetInputPortWidth(S, 0, DYNAMICALLY_SIZED);
     ssSetInputPortDirectFeedThrough(S, 0, 1);
 
-    if (!ssSetNumOutputPorts(S,1)) return;
-    ssSetOutputPortWidth(S, 0, DYNAMICALLY_SIZED);
+    if (!ssSetNumOutputPorts(S,0)) return;
+    // ssSetOutputPortWidth(S, 0, DYNAMICALLY_SIZED);
 
     ssSetNumSampleTimes(S, 1);
 
@@ -99,13 +101,15 @@ static void
 mdlOutputs(SimStruct *S, int_T tid)
 {
     int_T i;
-    InputRealPtrsType uPtrs = ssGetInputPortRealSignalPtrs(S,0);
-    real_T *y = ssGetOutputPortRealSignal(S,0);
-    int_T width = ssGetOutputPortWidth(S,0);
+    InputRealPtrsType uPtrs;
 
-    for (i=0; i<width; i++) {
-        *y++ = 2.0 *(*uPtrs[i]);
-    }
+    uPtrs = ssGetInputPortRealSignalPtrs(S,0);
+    // real_T *y = ssGetOutputPortRealSignal(S,0);
+    // int_T width = ssGetOutputPortWidth(S,0);
+    //
+    // for (i=0; i<width; i++) {
+    //     *y++ = 2.0 *(*uPtrs[i]);
+    // }
 
     RingBuffer* ring_buffer = (RingBuffer*)ssGetPWorkValue(S, 0);
     publish(ring_buffer, *uPtrs[0]);

@@ -5,6 +5,7 @@
 
 #include "ringbuffer.h"
 #include "checksum.h"
+#include "cbor.h"
 
 static Message NULL_MSG = {.data = 0, .wait = true};
 
@@ -18,13 +19,18 @@ void
 publish(RingBuffer* ring_buffer, float value)
 {
     unsigned int wrapped_idx;
+    CborEncoder encoder;
+
     wrapped_idx = wrap(ring_buffer->write_idx);
 
     /* Pointer to the position to write. */
     Message* msg = &ring_buffer->buffer[wrapped_idx];
 
     /* Write the value. */
-    msg->data = value;
+    // msg->data = value;
+    cbor_encoder_init(&encoder, (uint8_t *)&msg->data, sizeof(msg->data), 0);
+    cbor_encode_float(&encoder, value);
+
     // memset(msg->data, 0, 1024 * 1024);
     msg->wait = false;
     

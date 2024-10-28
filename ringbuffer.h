@@ -14,7 +14,7 @@ typedef struct
 typedef struct
 {
     // uint8_t data[1024*1024];
-    float data;
+    uint8_t data[16];
     bool wait;
     unsigned long checksum;
     struct timespec timestamp;

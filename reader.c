@@ -13,9 +13,22 @@
 
 #include "simstruc.h"
 #include "ringbuffer.h"
+#include "cbor.h"
 
 
 #define MDL_START
+
+float
+extract_float(const uint8_t *buffer, size_t len)
+{
+    CborParser parser;
+    CborValue value;
+    float result;
+
+    cbor_parser_init(buffer, len, 0, &parser, &value);
+    cbor_value_get_float(&value, &result);
+    return result;
+}
 
 static void
 report_and_exit(const char* msg, SimStruct *S)
@@ -63,7 +76,7 @@ mdlInitializeSizes(SimStruct *S)
     ssSetOptions(S, SS_OPTION_EXCEPTION_FREE_CODE);
 
     /* Allocate space for the pointer to shared memory. */
-    ssSetNumPWork(S, 2);
+    ssSetNumPWork(S, 3);
 }
 
 static void
@@ -83,6 +96,7 @@ mdlOutputs(SimStruct *S, int_T tid)
     real_T *y;
     int_T width;
     int_T i;
+    real_T result;
 
     y = ssGetOutputPortRealSignal(S,0);
     width = ssGetOutputPortWidth(S,0);
@@ -93,8 +107,9 @@ mdlOutputs(SimStruct *S, int_T tid)
     msg = read_next(read_token, ring_buffer);
 
     if (!msg.wait) {
+        result = extract_float(msg.data, 16); 
         for (i=0; i<width; i++) {
-            *y++ = msg.data;
+            *y++ = result;
         }
     }
 
