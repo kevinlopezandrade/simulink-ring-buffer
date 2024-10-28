@@ -16,10 +16,11 @@ wrap(unsigned int idx)
 }
 
 void
-publish(RingBuffer* ring_buffer, float value)
+publish(RingBuffer* ring_buffer, double** vec, size_t vec_len)
 {
     unsigned int wrapped_idx;
-    CborEncoder encoder;
+    CborEncoder encoder, arrayEncoder;
+    int i;
 
     wrapped_idx = wrap(ring_buffer->write_idx);
 
@@ -28,14 +29,19 @@ publish(RingBuffer* ring_buffer, float value)
 
     /* Write the value. */
     // msg->data = value;
+
     cbor_encoder_init(&encoder, (uint8_t *)&msg->data, sizeof(msg->data), 0);
-    cbor_encode_float(&encoder, value);
+    cbor_encoder_create_array(&encoder, &arrayEncoder, vec_len);
+    for (i = 0; i < vec_len; i++) {
+        cbor_encode_double(&arrayEncoder, *vec[i]);
+    }
+    cbor_encoder_close_container(&encoder, &arrayEncoder);
 
     // memset(msg->data, 0, 1024 * 1024);
     msg->wait = false;
     
     // msg->checksum = crc((unsigned char*) msg->data, sizeof(uint8_t[1024*1024]));
-    msg->checksum = crc((unsigned char*) &value, sizeof(float));
+    // msg->checksum = crc((unsigned char*) &value, sizeof(float));
 
 
     /* Add timestamp. */

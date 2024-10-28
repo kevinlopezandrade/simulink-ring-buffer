@@ -100,19 +100,15 @@ mdlInitializeSampleTimes(SimStruct *S)
 static void
 mdlOutputs(SimStruct *S, int_T tid)
 {
-    int_T i;
+    // int_T i;
+    int_T inp_width;
     InputRealPtrsType uPtrs;
 
     uPtrs = ssGetInputPortRealSignalPtrs(S,0);
-    // real_T *y = ssGetOutputPortRealSignal(S,0);
-    // int_T width = ssGetOutputPortWidth(S,0);
-    //
-    // for (i=0; i<width; i++) {
-    //     *y++ = 2.0 *(*uPtrs[i]);
-    // }
-
     RingBuffer* ring_buffer = (RingBuffer*)ssGetPWorkValue(S, 0);
-    publish(ring_buffer, *uPtrs[0]);
+    inp_width = ssGetInputPortWidth(S, 0);
+
+    publish(ring_buffer, uPtrs, inp_width);
 }
 
 static void

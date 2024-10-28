@@ -14,7 +14,7 @@ typedef struct
 typedef struct
 {
     // uint8_t data[1024*1024];
-    uint8_t data[16];
+    uint8_t data[40];
     bool wait;
     unsigned long checksum;
     struct timespec timestamp;
@@ -34,7 +34,7 @@ unsigned int
 wrap(unsigned int idx);
 
 void
-publish(RingBuffer* ring_buffer, float value);
+publish(RingBuffer* ring_buffer, double** vec, size_t vec_len);
 
 Message
 read_next(ReadToken* token, RingBuffer* ring_buffer);

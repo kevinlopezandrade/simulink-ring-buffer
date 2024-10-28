@@ -97,6 +97,9 @@ mdlOutputs(SimStruct *S, int_T tid)
     int_T width;
     int_T i;
     real_T result;
+    CborValue it;
+    CborParser parser;
+    CborValue array_it;
 
     y = ssGetOutputPortRealSignal(S,0);
     width = ssGetOutputPortWidth(S,0);
@@ -107,9 +110,14 @@ mdlOutputs(SimStruct *S, int_T tid)
     msg = read_next(read_token, ring_buffer);
 
     if (!msg.wait) {
-        result = extract_float(msg.data, 16); 
+        cbor_parser_init(msg.data, 60, 0, &parser, &it);
+        cbor_value_enter_container(&it, &array_it);
+
         for (i=0; i<width; i++) {
+            cbor_value_get_double(&array_it, &result);
+
             *y++ = result;
+            cbor_value_advance_fixed(&array_it);
         }
     }
 
