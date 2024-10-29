@@ -1,5 +1,6 @@
 #define S_FUNCTION_NAME mmapwriter
 #define S_FUNCTION_LEVEL 2
+
 #include <sys/mman.h>
 #include <sys/stat.h>        /* For mode constants */
 #include <fcntl.h>           /* For O_* constants */
@@ -10,14 +11,18 @@
 #include <string.h>
 #include <stdatomic.h>
 #include <time.h>
+#include <errno.h>
 
+#include "matrix.h"
 #include "simstruc.h"
 #include "ringbuffer.h"
 
-// #include "cbor.h"
-
+#define NPRMS 1
+#define sharedFileIdIdx 0
 
 #define MDL_START
+#define MDL_CHECK_PARAMETERS
+
 
 static void
 report_and_exit(const char* msg, SimStruct *S)
@@ -25,15 +30,39 @@ report_and_exit(const char* msg, SimStruct *S)
     ssSetErrorStatus(S, msg);
 }
 
+
+#if defined(MDL_CHECK_PARAMETERS) && defined(MATLAB_MEX_FILE)
+static void
+mdlCheckParameters(SimStruct *S)
+{
+    const char* shm_file_id;
+    shm_file_id = mxArrayToString(ssGetSFcnParam(S, sharedFileIdIdx));
+
+    if (shm_open(shm_file_id, O_RDONLY | O_EXCL | O_CREAT, S_IRUSR | S_IWUSR) == -1){
+        if (errno == EEXIST) {
+            /* Shared file object exists, therefore unlink it. */
+            ssWarning(S, "Shared memory object exists. Unlinking it.");
+            shm_unlink(shm_file_id);
+        }
+    }
+
+}
+#else
+#define mdlCheckParameters(S)
+#endif
+
+
 static void
 mdlStart(SimStruct *S)
 {
     int fd;
     size_t ring_bytes;
+    char* shm_file_id;
 
     /* Start the shared memory */
+    shm_file_id = mxArrayToString(ssGetSFcnParam(S, sharedFileIdIdx));
     ring_bytes = sizeof(RingBuffer);
-    fd = shm_open("matlab-test", O_CREAT | O_EXCL | O_RDWR, S_IRUSR | S_IWUSR);
+    fd = shm_open(shm_file_id, O_CREAT | O_EXCL | O_RDWR, S_IRUSR | S_IWUSR);
 
     if (fd == -1) {
         report_and_exit("could not open shared memory", S);
@@ -65,20 +94,27 @@ mdlStart(SimStruct *S)
     }
 }
 
+
 static void
 mdlInitializeSizes(SimStruct *S)
 {
-    ssSetNumSFcnParams(S, 0);
+    ssSetNumSFcnParams(S, NPRMS);
     if (ssGetNumSFcnParams(S) != ssGetSFcnParamsCount(S)) {
         return; /* Parameter mismatch reported by the Simulink engine*/
     }
+
+    mdlCheckParameters(S);
+    if (ssGetErrorStatus(S) != NULL) return;
+
+    /* Specify that none of the parameters are tunable */
+    ssSetSFcnParamTunable(S, sharedFileIdIdx, false);
+
 
     if (!ssSetNumInputPorts(S, 1)) return;
     ssSetInputPortWidth(S, 0, DYNAMICALLY_SIZED);
     ssSetInputPortDirectFeedThrough(S, 0, 1);
 
     if (!ssSetNumOutputPorts(S,0)) return;
-    // ssSetOutputPortWidth(S, 0, DYNAMICALLY_SIZED);
 
     ssSetNumSampleTimes(S, 1);
 
@@ -100,7 +136,6 @@ mdlInitializeSampleTimes(SimStruct *S)
 static void
 mdlOutputs(SimStruct *S, int_T tid)
 {
-    // int_T i;
     int_T inp_width;
     InputRealPtrsType uPtrs;
 
@@ -114,7 +149,10 @@ mdlOutputs(SimStruct *S, int_T tid)
 static void
 mdlTerminate(SimStruct *S)
 {
-    shm_unlink("matlab-test");
+    const char* shm_file_id;
+
+    shm_file_id = mxArrayToString(ssGetSFcnParam(S, sharedFileIdIdx));
+    shm_unlink(shm_file_id);
 }
 
 #ifdef MATLAB_MEX_FILE /* Is this file being compiled as a MEX-file? */

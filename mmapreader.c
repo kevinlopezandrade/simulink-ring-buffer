@@ -1,4 +1,4 @@
-#define S_FUNCTION_NAME reader
+#define S_FUNCTION_NAME mmapreader
 #define S_FUNCTION_LEVEL 2
 #include <sys/mman.h>
 #include <sys/stat.h>        /* For mode constants */
@@ -15,6 +15,8 @@
 #include "ringbuffer.h"
 #include "cbor.h"
 
+#define NPRMS 1
+#define sharedFileIdIdx 0
 
 #define MDL_START
 
@@ -42,9 +44,15 @@ mdlStart(SimStruct *S)
     int shm_fd;
     void *shm_ptr;
     struct stat shm_stat;
+    char* shm_file_id;
 
     /* Open the shared memory object for reading */
-    shm_fd = shm_open("matlab-test", O_RDONLY, S_IWUSR);
+    shm_file_id = mxArrayToString(ssGetSFcnParam(S, sharedFileIdIdx));
+    shm_fd = shm_open(shm_file_id, O_RDONLY, S_IWUSR);
+
+    if (shm_fd == -1) {
+        report_and_exit("could not open shared memory", S);
+    }
 
     /* Memory map the shared memory object for reading only */
     shm_ptr = mmap(NULL, sizeof(RingBuffer), PROT_READ, MAP_SHARED, shm_fd, 0);
@@ -59,10 +67,13 @@ mdlStart(SimStruct *S)
 static void
 mdlInitializeSizes(SimStruct *S)
 {
-    ssSetNumSFcnParams(S, 0);
+    ssSetNumSFcnParams(S, NPRMS);
     if (ssGetNumSFcnParams(S) != ssGetSFcnParamsCount(S)) {
         return; /* Parameter mismatch reported by the Simulink engine*/
     }
+
+    /* Specify that none of the parameters are tunable */
+    ssSetSFcnParamTunable(S, sharedFileIdIdx, false);
 
     if (!ssSetNumInputPorts(S, 0)) return;
 
