@@ -16,7 +16,7 @@ wrap(unsigned int idx)
 }
 
 void
-publish(RingBuffer* ring_buffer, double** vec, size_t vec_len)
+publish(RingBuffer* ring_buffer, const double* const* vec, size_t vec_len)
 {
     unsigned int wrapped_idx;
     CborEncoder encoder, arrayEncoder;
@@ -40,7 +40,8 @@ publish(RingBuffer* ring_buffer, double** vec, size_t vec_len)
     // memset(msg->data, 0, 1024 * 1024);
     msg->wait = false;
     
-    // msg->checksum = crc((unsigned char*) msg->data, sizeof(uint8_t[1024*1024]));
+    /* Encode the cbor buffer */
+    msg->checksum = crc((unsigned char*) msg->data, CBOR_BUFFER_SIZE);
     // msg->checksum = crc((unsigned char*) &value, sizeof(float));
 
 

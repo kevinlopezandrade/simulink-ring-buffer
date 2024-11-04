@@ -69,13 +69,13 @@ main(int argc, char *argv[])
         Message msg = read_next(&read_token, ring_buffer);
         if (!msg.wait) {
             counter += 1;
-            if (crc((unsigned char *)&msg.data, sizeof(float) != msg.checksum)) {
+            if ( crc((unsigned char *)&msg.data, CBOR_BUFFER_SIZE) != msg.checksum ) {
                 fprintf(stderr, "Checksum failed");
             }
             benchmark_step(&benchmark, &msg);
         }
     };
-    evaluate(&benchmark, counter, sizeof(float));
+    evaluate(&benchmark, counter, CBOR_BUFFER_SIZE);
 
 
     // Cleanup: Unmap and close the shared memory object

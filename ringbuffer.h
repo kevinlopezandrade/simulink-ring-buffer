@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #define BUFFER_SIZE 256
+#define CBOR_BUFFER_SIZE 40
 
 typedef struct
 {
@@ -13,8 +14,7 @@ typedef struct
 
 typedef struct
 {
-    // uint8_t data[1024*1024];
-    uint8_t data[40];
+    uint8_t data[CBOR_BUFFER_SIZE];
     bool wait;
     unsigned long checksum;
     struct timespec timestamp;
@@ -34,7 +34,7 @@ unsigned int
 wrap(unsigned int idx);
 
 void
-publish(RingBuffer* ring_buffer, double** vec, size_t vec_len);
+publish(RingBuffer* ring_buffer, const double* const* vec, size_t vec_len);
 
 Message
 read_next(ReadToken* token, RingBuffer* ring_buffer);

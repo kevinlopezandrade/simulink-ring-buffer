@@ -14,6 +14,7 @@
 #include "simstruc.h"
 #include "ringbuffer.h"
 #include "cbor.h"
+#include "checksum.h"
 
 #define NPRMS 1
 #define sharedFileIdIdx 0
@@ -121,6 +122,10 @@ mdlOutputs(SimStruct *S, int_T tid)
     msg = read_next(read_token, ring_buffer);
 
     if (!msg.wait) {
+        if ( crc((unsigned char *)&msg.data, CBOR_BUFFER_SIZE) != msg.checksum ) {
+            return;
+        }
+
         cbor_parser_init(msg.data, 60, 0, &parser, &it);
         cbor_value_enter_container(&it, &array_it);
 
