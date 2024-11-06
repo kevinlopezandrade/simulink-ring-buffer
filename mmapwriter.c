@@ -21,7 +21,7 @@
 #define sharedFileIdIdx 0
 
 #define MDL_START
-#define MDL_CHECK_PARAMETERS
+// #define MDL_CHECK_PARAMETERS
 
 
 static void
@@ -103,7 +103,7 @@ mdlInitializeSizes(SimStruct *S)
         return; /* Parameter mismatch reported by the Simulink engine*/
     }
 
-    mdlCheckParameters(S);
+    // mdlCheckParameters(S);
     if (ssGetErrorStatus(S) != NULL) return;
 
     /* Specify that none of the parameters are tunable */

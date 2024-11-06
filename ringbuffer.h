@@ -20,6 +20,8 @@ typedef struct
     struct timespec timestamp;
 } Message;
 
+// TODO: Add a length to the struct.
+
 typedef struct
 {
     /* Assuming infinite memory */

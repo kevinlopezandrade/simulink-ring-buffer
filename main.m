@@ -1,3 +1,3 @@
-sim_input = Simulink.SimulationInput("test");
+sim_input = Simulink.SimulationInput("mouse");
 
 sim(sim_input)
