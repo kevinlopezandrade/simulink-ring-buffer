@@ -17,11 +17,11 @@
 #include "simstruc.h"
 #include "ringbuffer.h"
 
-#define NPRMS 1
-#define sharedFileIdIdx 0
+#define NPRMS 2
+#define sharedFileIdIdx 1
 
 #define MDL_START
-// #define MDL_CHECK_PARAMETERS
+#define MDL_CHECK_PARAMETERS
 
 
 static void
@@ -37,14 +37,7 @@ mdlCheckParameters(SimStruct *S)
 {
     const char* shm_file_id;
     shm_file_id = mxArrayToString(ssGetSFcnParam(S, sharedFileIdIdx));
-
-    if (shm_open(shm_file_id, O_RDONLY | O_EXCL | O_CREAT, S_IRUSR | S_IWUSR) == -1){
-        if (errno == EEXIST) {
-            /* Shared file object exists, therefore unlink it. */
-            ssWarning(S, "Shared memory object exists. Unlinking it.");
-            shm_unlink(shm_file_id);
-        }
-    }
+    shm_unlink(shm_file_id);
 
 }
 #else
@@ -103,16 +96,29 @@ mdlInitializeSizes(SimStruct *S)
         return; /* Parameter mismatch reported by the Simulink engine*/
     }
 
-    // mdlCheckParameters(S);
+    if (!ssSetNumInputPorts(S, 1)) return;
+
+    DTypeId id;
+    ssRegisterTypeFromNamedObject(S, "TopBus", &id);
+
+    if (id == INVALID_DTYPE_ID) {
+        report_and_exit("Registration Did not Work", S);
+    } else {
+        ssSetInputPortDataType(S, 0, id);
+        ssSetInputPortWidth(S, 0, 1);
+        ssSetInputPortComplexSignal(S, 0, COMPLEX_NO);
+        ssSetInputPortDirectFeedThrough(S, 0, 1);
+        ssSetInputPortRequiredContiguous(S, 0, 1);
+        ssSetBusInputAsStruct(S, 0, 1);
+        ssSetInputPortBusMode(S, 0, SL_BUS_MODE);
+    }
+
+
+    mdlCheckParameters(S);
     if (ssGetErrorStatus(S) != NULL) return;
 
     /* Specify that none of the parameters are tunable */
     ssSetSFcnParamTunable(S, sharedFileIdIdx, false);
-
-
-    if (!ssSetNumInputPorts(S, 1)) return;
-    ssSetInputPortWidth(S, 0, DYNAMICALLY_SIZED);
-    ssSetInputPortDirectFeedThrough(S, 0, 1);
 
     if (!ssSetNumOutputPorts(S,0)) return;
 
@@ -136,14 +142,25 @@ mdlInitializeSampleTimes(SimStruct *S)
 static void
 mdlOutputs(SimStruct *S, int_T tid)
 {
-    int_T inp_width;
-    InputRealPtrsType uPtrs;
-
-    uPtrs = ssGetInputPortRealSignalPtrs(S,0);
     RingBuffer* ring_buffer = (RingBuffer*)ssGetPWorkValue(S, 0);
-    inp_width = ssGetInputPortWidth(S, 0);
 
-    publish(ring_buffer, uPtrs, inp_width);
+    DTypeId    dType    = ssGetInputPortDataType(S, 0);
+    int        numElems = ssGetNumBusElements(S, dType);
+    printf("Bus with n: %d\n", numElems);
+
+    int i;
+    for (i = 0; i < numElems; i++) {
+        int_T elemType = ssGetBusElementDataType(S, dType, i);
+
+        if (ssIsDataTypeABus(S, elemType) == 1) {
+            /* Sub-bus element */
+            printf("Element %d is a sub-bus\n", i);
+            printf("Sub bus with n: %d\n", ssGetNumBusElements(S, elemType));
+        } else if (elemType == SS_DOUBLE) {
+            printf("Element %d is a double\n", i);
+        }
+    }
+    // publish(ring_buffer, uPtrs, inp_width);
 }
 
 static void
