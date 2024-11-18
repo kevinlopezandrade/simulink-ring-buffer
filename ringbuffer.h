@@ -29,6 +29,7 @@ typedef struct
     _Atomic(unsigned int) oldest_idx;
     _Atomic(bool) filled;
     unsigned int buf_size;
+    unsigned int cbor_buffer_size;
     Message buffer[BUFFER_SIZE];
 } RingBuffer;
 

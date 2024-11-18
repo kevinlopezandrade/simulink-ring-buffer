@@ -35,15 +35,16 @@ void encode_cbor(
     int level
 )
 {
-    CborEncoder arrayEncoder;
-    cbor_encoder_create_array(encoder, &arrayEncoder, numInnerElems);
+    CborEncoder mapEncoder;
+    cbor_encoder_create_map(encoder, &mapEncoder, numInnerElems);
 
     int i;
     for (i = 0; i < numInnerElems; i++) {
         DTypeId subDtype = ssGetBusElementDataType(S, elemType, i);
 
         if (ssIsDataTypeABus(S, subDtype) == 1) {
-            encode_cbor(S, &arrayEncoder, inputPort, subDtype, ssGetNumBusElements(S, subDtype), (level + 1));
+            cbor_encode_text_stringz(&mapEncoder, ssGetBusElementName(S, elemType, i));
+            encode_cbor(S, &mapEncoder, inputPort, subDtype, ssGetNumBusElements(S, subDtype), (level + 1));
         }
         else {
             switch (subDtype) {
@@ -51,14 +52,18 @@ void encode_cbor(
                     int_T offset = ssGetBusElementOffset(S, elemType, i);
                     /* Assume that the bus element is of type double */
                     const double *in = (const double*) ((const char*)inputPort + offset);
-                    cbor_encode_double(&arrayEncoder, *in);
+
+                    cbor_encode_text_stringz(&mapEncoder, ssGetBusElementName(S, elemType, i));
+                    cbor_encode_double(&mapEncoder, *in);
+
                     // printf("Level: %d | Elements %d | SS_DOUBLE %f\n", level,  numInnerElems, *in);
+                    // printf("%s\n", ssGetBusElementName(S, elemType, i));
                     break;
             }
         }
     }
 
-    cbor_encoder_close_container(encoder, &arrayEncoder);
+    cbor_encoder_close_container(encoder, &mapEncoder);
 }
 
 
@@ -111,6 +116,7 @@ mdlStart(SimStruct *S)
         ring_buffer->oldest_idx = 0;
         ring_buffer->filled = false;
         ring_buffer->buf_size = BUFFER_SIZE;
+        ring_buffer->cbor_buffer_size = CBOR_BUFFER_SIZE;
 
 
         if (ring_buffer == MAP_FAILED) {
@@ -122,6 +128,9 @@ mdlStart(SimStruct *S)
 
         /* Pass the pointer to the rest of the callbacks. */
         ssSetPWorkValue(S, 0, ring_buffer);
+
+        uint8_t* cborBuffer = (uint8_t*) malloc(ring_buffer->cbor_buffer_size);
+        ssSetPWorkValue(S, 1, cborBuffer);
     }
 }
 
@@ -166,7 +175,7 @@ mdlInitializeSizes(SimStruct *S)
     ssSetOptions(S, SS_OPTION_EXCEPTION_FREE_CODE);
 
     /* Allocate space for the pointer to shared memory. */
-    ssSetNumPWork(S, 1);
+    ssSetNumPWork(S, 2);
 }
 
 static void
@@ -181,6 +190,7 @@ static void
 mdlOutputs(SimStruct *S, int_T tid)
 {
     RingBuffer* ring_buffer = (RingBuffer*)ssGetPWorkValue(S, 0);
+    uint8_t* cborBuffer = (uint8_t*)ssGetPWorkValue(S, 1);
 
     const void* inputPort = ssGetInputPortSignal(S, 0);
     DTypeId dType = ssGetInputPortDataType(S, 0);
@@ -202,11 +212,11 @@ mdlOutputs(SimStruct *S, int_T tid)
 
     // publish(ring_buffer, uPtrs, inp_width);
     CborEncoder encoder;
-    uint8_t cborBuffer[100];
+    unsigned int cbor_buffer_size = ring_buffer->cbor_buffer_size;
 
-    cbor_encoder_init(&encoder, cborBuffer, sizeof(cborBuffer), 0);
+    cbor_encoder_init(&encoder, cborBuffer, cbor_buffer_size, 0);
     encode_cbor(S, &encoder, inputPort, dType, numElems, 0);
-    publish(ring_buffer, cborBuffer, sizeof(cborBuffer));
+    publish(ring_buffer, cborBuffer, cbor_buffer_size);
 }
 
 static void
