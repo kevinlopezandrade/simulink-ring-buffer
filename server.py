@@ -10,7 +10,7 @@ from ctypes import Structure, c_uint, c_bool, c_uint8, c_ulong, c_long, cdll, ca
 import cbor2
 
 BUFFER_SIZE = 256
-CBOR_BUFFER_SIZE = 40
+CBOR_BUFFER_SIZE = 200
 
 
 class timespec(Structure):
@@ -39,6 +39,7 @@ class RingBuffer(Structure):
             ("oldest_idx",c_uint),
             ("filled", c_bool),
             ("buf_size", c_uint),
+            ("cbor_buffer_size", c_uint),
             ("buffer", Message * BUFFER_SIZE)
     ]
 
@@ -47,7 +48,7 @@ libringbuffer = cdll.LoadLibrary("./libringbuffer.so")
 libringbuffer.read_next.argtypes = [POINTER(ReadToken), POINTER(RingBuffer)]
 libringbuffer.read_next.restype = Message
 
-shm = shared_memory.SharedMemory(name="testing", create=False, track=False)
+shm = shared_memory.SharedMemory(name="Testing", create=False, track=False)
 ringbuffer = RingBuffer.from_buffer(shm.buf)
 read_token = ReadToken(0, False)
 
@@ -55,7 +56,9 @@ read_token = ReadToken(0, False)
 # while True:
 #     msg: Message = libringbuffer.read_next(pointer(read_token), pointer(ringbuffer))
 #     if not msg.wait:
-#         print(cbor2.loads(msg.data))
+#         data = cbor2.loads(msg.data)
+#         print(data)
+
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")

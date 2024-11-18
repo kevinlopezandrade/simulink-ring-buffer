@@ -8,7 +8,6 @@
         <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-        let cursorX = 0, cursorY = 0;
         const radius = 10;
 
         // Resize canvas to full window size
@@ -23,16 +22,20 @@
         const socket = new WebSocket('ws://localhost:8000/ws');
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            cursorX = data[0];
-            cursorY = data[1];
-            drawCursor();
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (signal in data) {
+                let point = data[signal];
+                drawCursor(point["X"], point["Y"]);
+            }
         };
 
         // Draw circle at the cursor position
-        function drawCursor() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+        function drawCursor(X, Y) {
+            // ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
             ctx.beginPath();
-            ctx.arc(cursorX, cursorY, radius, 0, Math.PI * 2);
+            ctx.arc(X, Y, radius, 0, Math.PI * 2);
             ctx.fillStyle = '#007BFF';
             ctx.fill();
             ctx.closePath();

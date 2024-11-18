@@ -44,7 +44,9 @@ void encode_cbor(
 
         if (ssIsDataTypeABus(S, subDtype) == 1) {
             cbor_encode_text_stringz(&mapEncoder, ssGetBusElementName(S, elemType, i));
-            encode_cbor(S, &mapEncoder, inputPort, subDtype, ssGetNumBusElements(S, subDtype), (level + 1));
+
+            int_T offset = ssGetBusElementOffset(S, elemType, i);
+            encode_cbor(S, &mapEncoder, inputPort + offset, subDtype, ssGetNumBusElements(S, subDtype), (level + 1));
         }
         else {
             switch (subDtype) {
@@ -146,7 +148,8 @@ mdlInitializeSizes(SimStruct *S)
     if (!ssSetNumInputPorts(S, 1)) return;
 
     DTypeId id;
-    ssRegisterTypeFromNamedObject(S, "TopBus", &id);
+    // ssRegisterTypeFromNamedObject(S, "TopBus", &id);
+    ssRegisterTypeFromParameter(S, 0, &id);
 
     if (id == INVALID_DTYPE_ID) {
         report_and_exit("Registration Did not Work", S);

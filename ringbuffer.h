@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #define BUFFER_SIZE 256
-#define CBOR_BUFFER_SIZE 100
+#define CBOR_BUFFER_SIZE 200
 
 typedef struct
 {
