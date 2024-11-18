@@ -16,12 +16,50 @@
 #include "matrix.h"
 #include "simstruc.h"
 #include "ringbuffer.h"
+#include "cbor.h"
 
 #define NPRMS 2
 #define sharedFileIdIdx 1
 
 #define MDL_START
 #define MDL_CHECK_PARAMETERS
+
+
+static
+void encode_cbor(
+    SimStruct* S,
+    CborEncoder* encoder,
+    const void* inputPort,
+    DTypeId elemType,
+    int numInnerElems,
+    int level
+)
+{
+    CborEncoder arrayEncoder;
+    cbor_encoder_create_array(encoder, &arrayEncoder, numInnerElems);
+
+    int i;
+    for (i = 0; i < numInnerElems; i++) {
+        DTypeId subDtype = ssGetBusElementDataType(S, elemType, i);
+
+        if (ssIsDataTypeABus(S, subDtype) == 1) {
+            encode_cbor(S, &arrayEncoder, inputPort, subDtype, ssGetNumBusElements(S, subDtype), (level + 1));
+        }
+        else {
+            switch (subDtype) {
+                case SS_DOUBLE:
+                    int_T offset = ssGetBusElementOffset(S, elemType, i);
+                    /* Assume that the bus element is of type double */
+                    const double *in = (const double*) ((const char*)inputPort + offset);
+                    cbor_encode_double(&arrayEncoder, *in);
+                    // printf("Level: %d | Elements %d | SS_DOUBLE %f\n", level,  numInnerElems, *in);
+                    break;
+            }
+        }
+    }
+
+    cbor_encoder_close_container(encoder, &arrayEncoder);
+}
 
 
 static void
@@ -144,23 +182,31 @@ mdlOutputs(SimStruct *S, int_T tid)
 {
     RingBuffer* ring_buffer = (RingBuffer*)ssGetPWorkValue(S, 0);
 
-    DTypeId    dType    = ssGetInputPortDataType(S, 0);
-    int        numElems = ssGetNumBusElements(S, dType);
-    printf("Bus with n: %d\n", numElems);
+    const void* inputPort = ssGetInputPortSignal(S, 0);
+    DTypeId dType = ssGetInputPortDataType(S, 0);
+    int numElems = ssGetNumBusElements(S, dType);
+    // printf("Bus with n: %d\n", numElems);
+    //
+    // int i;
+    // for (i = 0; i < numElems; i++) {
+    //     int_T elemType = ssGetBusElementDataType(S, dType, i);
+    //
+    //     if (ssIsDataTypeABus(S, elemType) == 1) {
+    //         /* Sub-bus element */
+    //         printf("Element %d is a sub-bus\n", i);
+    //         printf("Sub bus with n: %d\n", ssGetNumBusElements(S, elemType));
+    //     } else if (elemType == SS_DOUBLE) {
+    //         printf("Element %d is a double\n", i);
+    //     }
+    // }
 
-    int i;
-    for (i = 0; i < numElems; i++) {
-        int_T elemType = ssGetBusElementDataType(S, dType, i);
-
-        if (ssIsDataTypeABus(S, elemType) == 1) {
-            /* Sub-bus element */
-            printf("Element %d is a sub-bus\n", i);
-            printf("Sub bus with n: %d\n", ssGetNumBusElements(S, elemType));
-        } else if (elemType == SS_DOUBLE) {
-            printf("Element %d is a double\n", i);
-        }
-    }
     // publish(ring_buffer, uPtrs, inp_width);
+    CborEncoder encoder;
+    uint8_t cborBuffer[100];
+
+    cbor_encoder_init(&encoder, cborBuffer, sizeof(cborBuffer), 0);
+    encode_cbor(S, &encoder, inputPort, dType, numElems, 0);
+    publish(ring_buffer, cborBuffer, sizeof(cborBuffer));
 }
 
 static void

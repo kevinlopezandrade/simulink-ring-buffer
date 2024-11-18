@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #define BUFFER_SIZE 256
-#define CBOR_BUFFER_SIZE 40
+#define CBOR_BUFFER_SIZE 100
 
 typedef struct
 {
@@ -36,7 +36,7 @@ unsigned int
 wrap(unsigned int idx);
 
 void
-publish(RingBuffer* ring_buffer, const double* const* vec, size_t vec_len);
+publish(RingBuffer* ring_buffer, uint8_t* cborBuffer, size_t bufferLen);
 
 Message
 read_next(ReadToken* token, RingBuffer* ring_buffer);
