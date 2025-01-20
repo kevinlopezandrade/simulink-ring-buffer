@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 #include "benchmark.h"
-#include "ringbuffer.h"
+#include "libringbuffer/ringbuffer.h"
 
 /* Code adapted from  https://github.com/goldsborough/ipc-bench/ all
 credits to authoers of that repo. */

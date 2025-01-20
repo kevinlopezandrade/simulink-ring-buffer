@@ -8,9 +8,9 @@
 #include <errno.h>      // For errno
 #include <stdbool.h>
 
-#include "ringbuffer.h"
+#include "libringbuffer/ringbuffer.h"
 #include "benchmark.h"
-#include "checksum.h"
+#include "libringbuffer/checksum.h"
 
 static long elapsed(struct timespec* start, struct timespec* end){
     long seconds_diff = end->tv_sec - start->tv_sec;

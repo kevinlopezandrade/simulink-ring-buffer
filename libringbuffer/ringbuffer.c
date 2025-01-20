@@ -5,7 +5,7 @@
 
 #include "ringbuffer.h"
 #include "checksum.h"
-#include "cbor.h"
+#include "tinycbor/src/cbor.h"
 
 static Message NULL_MSG = {.data = 0, .wait = true};
 
@@ -43,7 +43,6 @@ publish(RingBuffer* ring_buffer, uint8_t* cborBuffer, size_t bufferLen)
     
     /* Encode the cbor buffer */
     msg->checksum = crc((unsigned char*) msg->data, bufferLen);
-    // msg->checksum = crc((unsigned char*) &value, sizeof(float));
 
 
     /* Add timestamp. */
@@ -51,7 +50,8 @@ publish(RingBuffer* ring_buffer, uint8_t* cborBuffer, size_t bufferLen)
 
     /* Increase the index of the infinite memory. Needs to bea atomic since a
     subscriber might read from this index. */
-    __sync_fetch_and_add(&ring_buffer->write_idx, 1);
+    // __sync_fetch_and_add(&ring_buffer->write_idx, 1);
+    ring_buffer->write_idx += 1;
 
 
     /* If full then advance the oldest_idx by fixed amount. */

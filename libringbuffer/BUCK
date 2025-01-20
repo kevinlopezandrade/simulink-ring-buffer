@@ -1,0 +1,27 @@
+cxx_library(
+    name="ringbuffer",
+    soname = "libringbuffer.so",
+    srcs = [
+        "ringbuffer.c"
+    ],
+    exported_headers = [
+        "ringbuffer.h"
+    ],
+    compiler_flags = ["-fPIC"],
+    linker_flags = ["-shared"],
+    deps = ["//:tinycbor", ":checksum"],
+    visibility = ["PUBLIC"]
+)
+
+cxx_library(
+    name="checksum",
+    srcs = [
+        "checksum.c"
+    ],
+    exported_headers = [
+        "checksum.h"
+    ],
+    preferred_linkage = "static",
+    compiler_flags = ["-fPIC"],
+    visibility = ["PUBLIC"]
+)
