@@ -356,6 +356,7 @@ mdlOutputs(SimStruct *S, int_T tid)
 
     if (!msg.wait) {
         if ( crc((unsigned char *)&msg.data, CBOR_BUFFER_SIZE) != msg.checksum ) {
+            printf("Checksum doest not match");
             return;
         }
         cbor_parser_init(msg.data, CBOR_BUFFER_SIZE, 0, &parser, &it);
