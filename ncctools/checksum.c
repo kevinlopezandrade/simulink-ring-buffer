@@ -1,45 +1,45 @@
 #include "checksum.h"
 
-/* crc32 Implementation taken from excellent lecture notes from
-KU Leuven University:
-https://perswww.kuleuven.be/~u0068190/Onderwijs/Extra_info/crc.pdf
-
-A more detailed explanation of the look-up table algorithm
-can be found in these excellent lecture notes from
-Ross N. Williams:
-http://www.ross.net/crc/download/crc_v3.txt
-
-crc Implementation take from the rfc:
-https://www.rfc-editor.org/rfc/rfc1952#section-8 */
-
-unsigned int
-crc32(unsigned char *message)
-{
-    int i, j;
-    unsigned int byte, crc, mask;
-    static unsigned int table[256];
-
-    /* Set up the table, if necessary. */
-    if (table[1] == 0) {
-        for (byte = 0; byte <= 255; byte++) {
-            crc = byte;
-            for (j = 7; j >= 0; j--) { // Do eight times.
-                mask = -(crc & 1);
-                crc = (crc >> 1) ^ (0xEDB88320 & mask);
-            }
-            table[byte] = crc;
-        }
-    }
-
-    /* Through with table setup, now calculate the CRC. */
-    i = 0;
-    crc = 0xFFFFFFFF;
-    while ((byte = message[i]) != 0) {
-        crc = (crc >> 8) ^ table[(crc ^ byte) & 0xFF];
-        i = i + 1;
-    }
-    return ~crc;
-}
+// /* crc32 Implementation taken from excellent lecture notes from
+// KU Leuven University:
+// https://perswww.kuleuven.be/~u0068190/Onderwijs/Extra_info/crc.pdf
+//
+// A more detailed explanation of the look-up table algorithm
+// can be found in these excellent lecture notes from
+// Ross N. Williams:
+// http://www.ross.net/crc/download/crc_v3.txt
+//
+// crc Implementation take from the rfc:
+// https://www.rfc-editor.org/rfc/rfc1952#section-8 */
+//
+// unsigned int
+// crc32(unsigned char *message)
+// {
+//     int i, j;
+//     unsigned int byte, crc, mask;
+//     static unsigned int table[256];
+//
+//     /* Set up the table, if necessary. */
+//     if (table[1] == 0) {
+//         for (byte = 0; byte <= 255; byte++) {
+//             crc = byte;
+//             for (j = 7; j >= 0; j--) { // Do eight times.
+//                 mask = -(crc & 1);
+//                 crc = (crc >> 1) ^ (0xEDB88320 & mask);
+//             }
+//             table[byte] = crc;
+//         }
+//     }
+//
+//     /* Through with table setup, now calculate the CRC. */
+//     i = 0;
+//     crc = 0xFFFFFFFF;
+//     while ((byte = message[i]) != 0) {
+//         crc = (crc >> 8) ^ table[(crc ^ byte) & 0xFF];
+//         i = i + 1;
+//     }
+//     return ~crc;
+// }
 
 
 

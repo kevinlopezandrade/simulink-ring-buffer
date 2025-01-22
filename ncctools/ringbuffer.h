@@ -2,6 +2,10 @@
 #define BUFFER_RING_H
 
 #include <stdint.h>
+#include <stdbool.h>
+#include <stdatomic.h>
+#include <time.h>
+#include <string.h>
 
 #define BUFFER_SIZE 256
 #define CBOR_BUFFER_SIZE 200

@@ -12,11 +12,11 @@
 #include <stdatomic.h>
 #include <time.h>
 #include <errno.h>
+#include <tinycbor/cbor.h>
 
 #include "matrix.h"
 #include "simstruc.h"
-#include "ringbuffer.h"
-#include "cbor.h"
+#include <ncctools/ringbuffer.h>
 
 #define NPRMS 2
 #define sharedFileIdIdx 1

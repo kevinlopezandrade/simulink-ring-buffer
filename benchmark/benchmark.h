@@ -1,7 +1,7 @@
 #ifndef BENCHMARK_H
 #define BENCHMARK_H
 
-#include "libringbuffer/ringbuffer.h"
+#include "ncctools/ringbuffer.h"
 
 typedef unsigned long long bench_t;
 

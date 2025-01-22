@@ -2,10 +2,10 @@
 #include <stdatomic.h>
 #include <time.h>
 #include <string.h>
+#include <tinycbor/cbor.h>
 
 #include "ringbuffer.h"
 #include "checksum.h"
-#include "tinycbor/src/cbor.h"
 
 static Message NULL_MSG = {.data = 0, .wait = true};
 

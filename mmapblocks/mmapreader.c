@@ -3,6 +3,9 @@
 #include <sys/mman.h>
 #include <sys/stat.h>        /* For mode constants */
 #include <fcntl.h>           /* For O_* constants */
+#include <tinycbor/cbor.h>
+#include <ncctools/ringbuffer.h>
+#include <ncctools/checksum.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,9 +15,6 @@
 #include <time.h>
 
 #include "simstruc.h"
-#include "ringbuffer.h"
-#include "cbor.h"
-#include "checksum.h"
 
 #define NPRMS 2
 #define sharedFileIdIdx 0
