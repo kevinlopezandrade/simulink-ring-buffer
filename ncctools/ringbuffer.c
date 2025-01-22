@@ -42,7 +42,7 @@ ncctools_publish(NCCToolsRingBuffer* ring_buffer, uint8_t* cborBuffer, size_t bu
     msg->wait = false;
     
     /* Encode the cbor buffer */
-    msg->checksum = crc((unsigned char*) msg->data, bufferLen);
+    msg->checksum = ncctools_crc((unsigned char*) msg->data, bufferLen);
 
 
     /* Add timestamp. */
@@ -50,8 +50,8 @@ ncctools_publish(NCCToolsRingBuffer* ring_buffer, uint8_t* cborBuffer, size_t bu
 
     /* Increase the index of the infinite memory. Needs to bea atomic since a
     subscriber might read from this index. */
-    // __sync_fetch_and_add(&ring_buffer->write_idx, 1);
-    ring_buffer->write_idx += 1;
+    __sync_fetch_and_add(&ring_buffer->write_idx, 1);
+    // ring_buffer->write_idx += 1;
 
 
     /* If full then advance the oldest_idx by fixed amount. */

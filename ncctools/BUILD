@@ -50,7 +50,7 @@ pkg_files(
         ":checksum_shared",
         ":ringbuffer_shared"
     ],
-    prefix = "lib/ncctools"
+    prefix = "lib"
 )
 
 pkg_filegroup(
@@ -76,5 +76,5 @@ pkg_deb(
     maintainer = "Kevin Lopez",
     version = "0.1",
     description = "Shared libraries for the Neural Computation and Cognition",
-    architecture = "x86_64"
+    architecture = "amd64"
 )

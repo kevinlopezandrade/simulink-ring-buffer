@@ -269,12 +269,12 @@ mdlStart(SimStruct *S)
     }
 
     /* Memory map the shared memory object for reading only */
-    shm_ptr = mmap(NULL, sizeof(RingBuffer), PROT_READ, MAP_SHARED, shm_fd, 0);
+    shm_ptr = mmap(NULL, sizeof(NCCToolsRingBuffer), PROT_READ, MAP_SHARED, shm_fd, 0);
 
-    RingBuffer* ring_buffer = (RingBuffer*)shm_ptr;
+    NCCToolsRingBuffer* ring_buffer = (NCCToolsRingBuffer*)shm_ptr;
     ssSetPWorkValue(S, 0, ring_buffer);
 
-    ReadToken read_token = {.idx = 0, .initialized = false};
+    NCCToolsReadToken read_token = {.idx = 0, .initialized = false};
     ssSetPWorkValue(S, 1, &read_token);
 }
 
@@ -337,25 +337,25 @@ mdlInitializeSampleTimes(SimStruct *S)
 static void
 mdlOutputs(SimStruct *S, int_T tid)
 {
-    RingBuffer* ring_buffer;
-    ReadToken* read_token;
-    Message msg;
+    NCCToolsRingBuffer* ring_buffer;
+    NCCToolsReadToken* read_token;
+    NCCToolsMessage msg;
     real_T result;
     CborValue it;
     CborParser parser;
 
-    ring_buffer = (RingBuffer*)ssGetPWorkValue(S, 0);
-    read_token = (ReadToken*)ssGetPWorkValue(S, 1);
+    ring_buffer = (NCCToolsRingBuffer*)ssGetPWorkValue(S, 0);
+    read_token = (NCCToolsReadToken*)ssGetPWorkValue(S, 1);
 
     void* output_port = ssGetOutputPortSignal(S, 0);
     DTypeId dtype = ssGetOutputPortDataType(S, 0);
     int num_elems = ssGetNumBusElements(S, dtype);
 
 
-    msg = read_next(read_token, ring_buffer);
+    msg = ncctools_read_next(read_token, ring_buffer);
 
     if (!msg.wait) {
-        if ( crc((unsigned char *)&msg.data, CBOR_BUFFER_SIZE) != msg.checksum ) {
+        if ( ncctools_crc((unsigned char *)&msg.data, CBOR_BUFFER_SIZE) != msg.checksum ) {
             printf("Checksum doest not match");
             return;
         }

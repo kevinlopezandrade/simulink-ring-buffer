@@ -69,7 +69,7 @@ main(int argc, char *argv[])
         NCCToolsMessage msg = ncctools_read_next(&read_token, ring_buffer);
         if (!msg.wait) {
             counter += 1;
-            if ( crc((unsigned char *)&msg.data, CBOR_BUFFER_SIZE) != msg.checksum ) {
+            if ( ncctools_crc((unsigned char *)&msg.data, CBOR_BUFFER_SIZE) != msg.checksum ) {
                 fprintf(stderr, "Checksum failed");
             }
             benchmark_step(&benchmark, &msg);

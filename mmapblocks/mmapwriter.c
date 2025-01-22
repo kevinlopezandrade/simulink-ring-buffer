@@ -206,7 +206,7 @@ mdlStart(SimStruct *S)
 
     /* Start the shared memory */
     shm_file_id = mxArrayToString(ssGetSFcnParam(S, sharedFileIdIdx));
-    ring_bytes = sizeof(RingBuffer);
+    ring_bytes = sizeof(NCCToolsRingBuffer);
     fd = shm_open(shm_file_id, O_CREAT | O_EXCL | O_RDWR, S_IRUSR | S_IWUSR);
 
     if (fd == -1) {
@@ -218,7 +218,7 @@ mdlStart(SimStruct *S)
         }
 
         /* Map it to external memory; */
-        RingBuffer* ring_buffer = (RingBuffer*)mmap(NULL, ring_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        NCCToolsRingBuffer* ring_buffer = (NCCToolsRingBuffer*)mmap(NULL, ring_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 
         /* Initialize */
         ring_buffer->write_idx = 0;
@@ -310,7 +310,7 @@ mdlInitializeSampleTimes(SimStruct *S)
 static void
 mdlOutputs(SimStruct *S, int_T tid)
 {
-    RingBuffer* ring_buffer = (RingBuffer*)ssGetPWorkValue(S, 0);
+    NCCToolsRingBuffer* ring_buffer = (NCCToolsRingBuffer*)ssGetPWorkValue(S, 0);
     uint8_t* cborBuffer = (uint8_t*)ssGetPWorkValue(S, 1);
 
     const void* inputPort = ssGetInputPortSignal(S, 0);
@@ -328,7 +328,7 @@ mdlOutputs(SimStruct *S, int_T tid)
 
     encode_cbor(S, &encoder, inputPort, dType, numElems, 0, &counter, (int32_t*) inputPortSizes, dims_flat_bus[0]);
 
-    publish(ring_buffer, cborBuffer, cbor_buffer_size);
+    ncctools_publish(ring_buffer, cborBuffer, cbor_buffer_size);
 }
 
 static void

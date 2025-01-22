@@ -97,7 +97,7 @@ update_crc(unsigned long crc, unsigned char *buf, int len)
 
 /* Return the CRC of the bytes buf[0..len-1]. */
 unsigned long
-crc(unsigned char *buf, int len)
+ncctools_crc(unsigned char *buf, int len)
 {
     return update_crc(0L, buf, len);
 }

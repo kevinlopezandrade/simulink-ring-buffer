@@ -2,6 +2,6 @@
 #define CHECKSUM_H
 
 unsigned long
-crc(unsigned char *buf, int len);
+ncctools_crc(unsigned char *buf, int len);
 
 #endif
