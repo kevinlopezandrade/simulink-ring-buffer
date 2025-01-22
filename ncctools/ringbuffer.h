@@ -14,7 +14,7 @@ typedef struct
 {
     unsigned int idx;
     bool initialized;
-} ReadToken;
+} NCCToolsReadToken;
 
 typedef struct
 {
@@ -22,7 +22,7 @@ typedef struct
     bool wait;
     unsigned long checksum;
     struct timespec timestamp;
-} Message;
+} NCCToolsMessage;
 
 // TODO: Add a length to the struct.
 
@@ -34,16 +34,13 @@ typedef struct
     _Atomic(bool) filled;
     unsigned int buf_size;
     unsigned int cbor_buffer_size;
-    Message buffer[BUFFER_SIZE];
-} RingBuffer;
-
-unsigned int
-wrap(unsigned int idx);
+    NCCToolsMessage buffer[BUFFER_SIZE];
+} NCCToolsRingBuffer;
 
 void
-publish(RingBuffer* ring_buffer, uint8_t* cborBuffer, size_t bufferLen);
+ncctools_publish(NCCToolsRingBuffer* ring_buffer, uint8_t* cborBuffer, size_t bufferLen);
 
-Message
-read_next(ReadToken* token, RingBuffer* ring_buffer);
+NCCToolsMessage
+ncctools_read_next(NCCToolsReadToken* token, NCCToolsRingBuffer* ring_buffer);
 
 #endif

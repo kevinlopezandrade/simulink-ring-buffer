@@ -34,7 +34,7 @@ setup_benchmark(Benchmark* bench) {
 }
 
 void
-benchmark_step(Benchmark* bench, Message* msg)
+benchmark_step(Benchmark* bench, NCCToolsMessage* msg)
 {
     const bench_t time = now() - (msg->timestamp.tv_sec * 1e9 +
         msg->timestamp.tv_nsec);

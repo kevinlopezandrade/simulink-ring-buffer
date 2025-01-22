@@ -7,16 +7,16 @@
 #include "ringbuffer.h"
 #include "checksum.h"
 
-static Message NULL_MSG = {.data = 0, .wait = true};
+static NCCToolsMessage NULL_MSG = {.data = 0, .wait = true};
 
-unsigned int
+static unsigned int
 wrap(unsigned int idx)
 {
     return idx & (BUFFER_SIZE - 1);
 }
 
 void
-publish(RingBuffer* ring_buffer, uint8_t* cborBuffer, size_t bufferLen)
+ncctools_publish(NCCToolsRingBuffer* ring_buffer, uint8_t* cborBuffer, size_t bufferLen)
 {
     unsigned int wrapped_idx;
     CborEncoder encoder, arrayEncoder;
@@ -25,7 +25,7 @@ publish(RingBuffer* ring_buffer, uint8_t* cborBuffer, size_t bufferLen)
     wrapped_idx = wrap(ring_buffer->write_idx);
 
     /* Pointer to the position to write. */
-    Message* msg = &ring_buffer->buffer[wrapped_idx];
+    NCCToolsMessage* msg = &ring_buffer->buffer[wrapped_idx];
 
     /* Write the value. */
     // msg->data = value;
@@ -64,8 +64,8 @@ publish(RingBuffer* ring_buffer, uint8_t* cborBuffer, size_t bufferLen)
 
 }
 
-Message
-read_next(ReadToken* token, RingBuffer* ring_buffer)
+NCCToolsMessage
+ncctools_read_next(NCCToolsReadToken* token, NCCToolsRingBuffer* ring_buffer)
 {
     unsigned int oldest_idx;
     unsigned int desired;
