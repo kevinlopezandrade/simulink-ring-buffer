@@ -1,3 +1,4 @@
+# NCCTools
 ## Serialization Dependency: TinyCBOR
 
 For serialization, we use CBOR (Concise Binary Object Representation) and the
@@ -23,6 +24,19 @@ make install
 
 This will place the TinyCBOR shared libraries in /usr/local/lib and the headers
 in /usr/local/include/tinycbor.
+
+
+## Installing NCCTools
+We use Bazel as our build system. To build all targets, simply run:
+```bash
+bazel build //...
+```
+This command compiles all Bazel targets and creates a bazel-bin directory
+(symlink) containing the resulting artifacts. Among these artifacts, you should
+see a .deb package. To install it, use:
+```
+dpkg -i {package-name}.deb 
+```
 
 ### Troubleshooting & Debugging
 
