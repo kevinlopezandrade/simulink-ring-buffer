@@ -1,7 +1,7 @@
 #ifndef BENCHMARK_H
 #define BENCHMARK_H
 
-#include "ringbuffer.h"
+#include "ncctools/ringbuffer.h"
 
 typedef unsigned long long bench_t;
 
@@ -32,7 +32,7 @@ void
 setup_benchmark(Benchmark* bench);
 
 void
-benchmark_step(Benchmark* bench, Message* msg);
+benchmark_step(Benchmark* bench, NCCToolsMessage* msg);
 
 void
 evaluate(Benchmark* bench, int size, int count);

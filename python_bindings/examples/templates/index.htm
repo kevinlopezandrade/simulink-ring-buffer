@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Real time streaming</title>
+    </head>
+    <body>
+        <canvas id="canvas"></canvas>
+        <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const radius = 10;
+
+        // Resize canvas to full window size
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // WebSocket connection to receive cursor data
+        const socket = new WebSocket('ws://localhost:8000/ws');
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (signal in data) {
+                let point = data[signal];
+                drawCursor(point["X"], point["Y"]);
+            }
+        };
+
+        // Draw circle at the cursor position
+        function drawCursor(X, Y) {
+            // ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+            ctx.beginPath();
+            ctx.arc(X, Y, radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#007BFF';
+            ctx.fill();
+            ctx.closePath();
+        }
+        </script>
+    </body>
+</html>

@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 #include "benchmark.h"
-#include "ringbuffer.h"
+#include "ncctools/ringbuffer.h"
 
 /* Code adapted from  https://github.com/goldsborough/ipc-bench/ all
 credits to authoers of that repo. */
@@ -34,7 +34,7 @@ setup_benchmark(Benchmark* bench) {
 }
 
 void
-benchmark_step(Benchmark* bench, Message* msg)
+benchmark_step(Benchmark* bench, NCCToolsMessage* msg)
 {
     const bench_t time = now() - (msg->timestamp.tv_sec * 1e9 +
         msg->timestamp.tv_nsec);
