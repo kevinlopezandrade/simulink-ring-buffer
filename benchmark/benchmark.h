@@ -5,36 +5,30 @@
 
 typedef unsigned long long bench_t;
 
-typedef struct
-{
-	// Start of the total benchmarking
-	bench_t total_start;
+typedef struct {
+  // Start of the total benchmarking
+  bench_t total_start;
 
-	// Minimum time
-	bench_t minimum;
+  // Minimum time
+  bench_t minimum;
 
-	// Maximum time
-	bench_t maximum;
+  // Maximum time
+  bench_t maximum;
 
-	// Sum (for averaging)
-	bench_t sum;
+  // Sum (for averaging)
+  bench_t sum;
 
-	// Squared sum (for standard deviation)
-	bench_t squared_sum;
+  // Squared sum (for standard deviation)
+  bench_t squared_sum;
 
 } Benchmark;
 
+bench_t now();
 
-bench_t
-now();
+void setup_benchmark(Benchmark *bench);
 
-void
-setup_benchmark(Benchmark* bench);
+void benchmark_step(Benchmark *bench, NCCToolsMessage *msg);
 
-void
-benchmark_step(Benchmark* bench, NCCToolsMessage* msg);
-
-void
-evaluate(Benchmark* bench, int size, int count);
+void evaluate(Benchmark *bench, int size, int count);
 
 #endif
