@@ -279,12 +279,14 @@ static void mdlInitializeSizes(SimStruct *S) {
   if (id == INVALID_DTYPE_ID) {
     report_and_exit("Registration Did not Work", S);
   } else {
-    char *dtypeName = ssGetDataTypeName(S, id);
+    const char *dtypeName = ssGetDataTypeName(S, id);
     if (dtypeName == NULL)
       return;
 
     ssSetOutputPortDataType(S, 0, id);
-    ssSetBusOutputObjectName(S, 0, dtypeName);
+
+    /* Avoid compiler warnings from using the const qualifier */
+    ssSetBusOutputObjectName(S, 0, strdup(dtypeName));
 
     ssSetOutputPortWidth(S, 0, DYNAMICALLY_SIZED);
     ssSetOutputPortComplexSignal(S, 0, COMPLEX_NO);
