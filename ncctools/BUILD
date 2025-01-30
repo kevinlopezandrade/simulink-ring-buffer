@@ -75,6 +75,6 @@ pkg_deb(
     data = ":ncctools-tar",
     maintainer = "Kevin Lopez",
     version = "0.1",
-    description = "Shared libraries for the Neural Computation and Cognition",
+    description = "Shared libraries for the Neural Computation and Cognition Group at ETH",
     architecture = "amd64"
 )

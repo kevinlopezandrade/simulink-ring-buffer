@@ -34,18 +34,17 @@ static void encode_cbor(SimStruct *S, CborEncoder *encoder,
   int i;
   for (i = 0; i < num_elems; i++) {
     DTypeId elem_type = ssGetBusElementDataType(S, dtype, i);
+    int_T offset = ssGetBusElementOffset(S, dtype, i);
 
     if (ssIsDataTypeABus(S, elem_type) == 1) {
 
       cbor_encode_text_stringz(&map_encoder, ssGetBusElementName(S, dtype, i));
 
-      int_T offset = ssGetBusElementOffset(S, dtype, i);
       encode_cbor(S, &map_encoder, input_port + offset, elem_type,
                   ssGetNumBusElements(S, elem_type), (level + 1), counter,
                   input_sizes, nrows);
 
     } else {
-      int_T offset = ssGetBusElementOffset(S, dtype, i);
 
       // Array is 2D Dimensional Array with column major order.
       int element_dims[2];
@@ -119,9 +118,10 @@ static void encode_cbor(SimStruct *S, CborEncoder *encoder,
             (const int *)((const char *)input_port + offset);
         if (dtaGetDataTypeIsEnumType(ssGetDataTypeAccess(S), ssGetPath(S),
                                      elem_type) == 1) {
-          // printf("%s\n",
-          // dtaGetEnumTypeStringFromValue(ssGetDataTypeAccess(S), ssGetPath(S),
-          // subDtype, *enum_value_in));
+
+          /* printf("%s\n",
+             dtaGetEnumTypeStringFromValue(ssGetDataTypeAccess(S), ssGetPath(S),
+             elem_type, *enum_value_in)); */
           cbor_encode_text_stringz(&map_encoder,
                                    ssGetBusElementName(S, dtype, i));
           cbor_encode_int(&map_encoder, *enum_value_in);

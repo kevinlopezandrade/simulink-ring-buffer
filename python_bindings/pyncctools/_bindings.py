@@ -59,7 +59,7 @@ def publish(
     cborbuffer_ptr: POINTER(c_uint8),
     cborbuffer_size: c_size_t,
 ):
-    _libringbuffer.publish(ringbuffer, cborbuffer_ptr, cborbuffer_size)
+    _libringbuffer.ncctools_publish(ringbuffer, cborbuffer_ptr, cborbuffer_size)
 
 
 def read_next(

@@ -68,7 +68,7 @@ NCCToolsMessage ncctools_read_next(NCCToolsReadToken *token,
   if (wgap < ring_buffer->buf_size) {
     token->idx = desired;
   } else {
-    /* I need to double confirmt the safety of this.
+    /* I need to double confirm the safety of this.
     I might be pointing here to an oudated value.
     Since oldest_idx might have been updated already by the
     publisher thread. */

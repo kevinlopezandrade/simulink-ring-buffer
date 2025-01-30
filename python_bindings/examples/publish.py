@@ -20,10 +20,17 @@ ringbuffer.cbor_buffer_size = CBOR_BUFFER_SIZE
 
 try:
     while True:
-        cborbuffer = cbor2.dumps({"m": [[np.random.rand()]], "y": [[7.0]]})
+        cborbuffer = cbor2.dumps({
+            "x": [[3.0]],
+            "inner": {
+                "y": [[np.random.rand()]],
+                "inner2": {
+                    "y": [[1.0]]
+                    }
+                }
+            }
+        )
         cborbuffer_ptr = cast(c_char_p(cborbuffer), POINTER(c_uint8))
-        cborbuffer_len = len(cborbuffer)
-
         publish(pointer(ringbuffer), cborbuffer_ptr, CBOR_BUFFER_SIZE)
 
 except KeyboardInterrupt:

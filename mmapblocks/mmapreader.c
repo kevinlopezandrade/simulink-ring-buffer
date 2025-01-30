@@ -1,10 +1,10 @@
 #define S_FUNCTION_NAME mmapreader
 #define S_FUNCTION_LEVEL 2
-#include <fcntl.h> /* For O_* constants */
+#include <fcntl.h>
 #include <ncctools/checksum.h>
 #include <ncctools/ringbuffer.h>
 #include <sys/mman.h>
-#include <sys/stat.h> /* For mode constants */
+#include <sys/stat.h>
 #include <tinycbor/cbor.h>
 
 #include <stdatomic.h>
@@ -162,54 +162,58 @@ static void decode_cbor(SimStruct *S, const void *output_port, DTypeId dtype,
   for (i = 0; i < num_elems; i++) {
     DTypeId elem_type = ssGetBusElementDataType(S, dtype, i);
     const char *elem_name = ssGetBusElementName(S, dtype, i);
+    int_T offset = ssGetBusElementOffset(S, dtype, i);
+
+    CborValue value;
+    cbor_value_map_find_value(it, elem_name, &value);
+
+    if (!cbor_value_is_valid(&value)) {
+      printf("Could not find the bus element");
+      continue;
+    }
 
     if (ssIsDataTypeABus(S, elem_type) == 1) {
-      // cbor_value_map_find_value()
+      decode_cbor(S, output_port + offset, elem_type,
+                  ssGetNumBusElements(S, elem_type), &value);
     } else {
-      int_T offset = ssGetBusElementOffset(S, dtype, i);
-      CborValue value;
-
-      if (cbor_value_map_find_value(it, elem_name, &value) == CborInvalidType) {
-        printf("Could not find the element");
-      }
       switch (elem_type) {
       case SS_DOUBLE:
-        if (cbor_value_is_container(&value)) {
-          size_t num_rows;
-          cbor_value_get_array_length(&value, &num_rows);
-          CborValue row_it;
-          size_t num_cols;
-
-          cbor_value_enter_container(&value, &row_it);
-          assert(cbor_value_is_container(&row_it));
-
-          cbor_value_get_array_length(&row_it, &num_cols);
-
-          // size_t nbytes = sizeof(double) * (num_cols * num_rows);
-          // double* arr = (double*) malloc(nbytes);
-
-          double *arr = (double *)((const char *)output_port + offset);
-
-          int r;
-          for (r = 0; r < num_rows; r++) {
-            int c;
-            CborValue col_it;
-            for (c = 0; c < num_cols; c++) {
-              cbor_value_enter_container(&row_it, &col_it);
-              assert(cbor_value_is_container(&col_it));
-
-              /* Matlab requires column major format */
-              double val;
-              cbor_value_get_double(&col_it, &val);
-              arr[(c * num_cols) + r] = val;
-
-              cbor_value_advance_fixed(&col_it);
-            }
-
-            cbor_value_advance(&row_it);
-          }
-          cbor_value_leave_container(&value, &row_it);
+        if (!cbor_value_is_container(&value)) {
+          printf("Decoded value is not an 2-D Array.\n");
+          continue;
         }
+
+        size_t num_rows;
+        size_t num_cols;
+        CborValue row_it;
+
+        cbor_value_get_array_length(&value, &num_rows);
+
+        cbor_value_enter_container(&value, &row_it);
+        assert(cbor_value_is_container(&row_it));
+        cbor_value_get_array_length(&row_it, &num_cols);
+
+        double *arr = (double *)((const char *)output_port + offset);
+
+        int r;
+        for (r = 0; r < num_rows; r++) {
+          int c;
+          CborValue col_it;
+          for (c = 0; c < num_cols; c++) {
+            cbor_value_enter_container(&row_it, &col_it);
+            assert(cbor_value_is_container(&col_it));
+
+            /* Matlab requires column major format */
+            double val;
+            cbor_value_get_double(&col_it, &val);
+            arr[(c * num_cols) + r] = val;
+
+            cbor_value_advance_fixed(&col_it);
+          }
+
+          cbor_value_advance(&row_it);
+        }
+        cbor_value_leave_container(&value, &row_it);
       }
     }
   }
@@ -290,7 +294,7 @@ static void mdlInitializeSizes(SimStruct *S) {
 }
 
 static void mdlInitializeSampleTimes(SimStruct *S) {
-  ssSetSampleTime(S, 0, 0.1);
+  ssSetSampleTime(S, 0, INHERITED_SAMPLE_TIME);
   ssSetOffsetTime(S, 0, 0.0);
 }
 
