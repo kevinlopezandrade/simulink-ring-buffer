@@ -7,7 +7,7 @@
 #include <string.h>
 #include <time.h>
 
-#define BUFFER_SIZE 256
+#define BUFFER_SIZE 256 /* MUST BE A POWER OF 2 ! */
 #define CBOR_BUFFER_SIZE 200
 
 typedef struct {

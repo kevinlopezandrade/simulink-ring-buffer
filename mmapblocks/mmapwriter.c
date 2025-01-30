@@ -81,51 +81,52 @@ static void encode_cbor(SimStruct *S, CborEncoder *encoder,
         cbor_encoder_close_container(&map_encoder, &array_encoder);
         break;
 
-      case SS_SINGLE:
-        const float *float_in =
-            (const float *)((const char *)input_port + offset);
-
-        cbor_encode_text_stringz(&map_encoder,
-                                 ssGetBusElementName(S, dtype, i));
-        cbor_encode_float(&map_encoder, *float_in);
-        break;
-      case SS_INT8:
-      case SS_INT16:
-      case SS_INT32:
-        /* CBOR Doest not provide a function to encode int8 or int16, so we cast
-        it as a normal integer */
-        const long int *int_in =
-            (const long int *)((const char *)input_port + offset);
-
-        cbor_encode_text_stringz(&map_encoder,
-                                 ssGetBusElementName(S, dtype, i));
-        cbor_encode_int(&map_encoder, *int_in);
-        break;
-      case SS_UINT8:
-      case SS_UINT16:
-      case SS_UINT32:
-        /* CBOR Doest not provide a function to encode uint8 or uint16, so we
-        cast it as a normal unsigned integer */
-        const unsigned long int *uint_in =
-            (const unsigned long int *)((const char *)input_port + offset);
-
-        cbor_encode_text_stringz(&map_encoder,
-                                 ssGetBusElementName(S, dtype, i));
-        cbor_encode_uint(&map_encoder, *uint_in);
-        break;
+      // case SS_SINGLE:
+      //   const float *float_in =
+      //       (const float *)((const char *)input_port + offset);
+      //
+      //   cbor_encode_text_stringz(&map_encoder,
+      //                            ssGetBusElementName(S, dtype, i));
+      //   cbor_encode_float(&map_encoder, *float_in);
+      //   break;
+      // case SS_INT8:
+      // case SS_INT16:
+      // case SS_INT32:
+      //   /* CBOR Doest not provide a function to encode int8 or int16, so we cast
+      //   it as a normal integer */
+      //   const long int *int_in =
+      //       (const long int *)((const char *)input_port + offset);
+      //
+      //   cbor_encode_text_stringz(&map_encoder,
+      //                            ssGetBusElementName(S, dtype, i));
+      //   cbor_encode_int(&map_encoder, *int_in);
+      //   break;
+      // case SS_UINT8:
+      // case SS_UINT16:
+      // case SS_UINT32:
+      //   /* CBOR Doest not provide a function to encode uint8 or uint16, so we
+      //   cast it as a normal unsigned integer */
+      //   const unsigned long int *uint_in =
+      //       (const unsigned long int *)((const char *)input_port + offset);
+      //
+      //   cbor_encode_text_stringz(&map_encoder,
+      //                            ssGetBusElementName(S, dtype, i));
+      //   cbor_encode_uint(&map_encoder, *uint_in);
+      //   break;
       default:
-        const int *enum_value_in =
-            (const int *)((const char *)input_port + offset);
-        if (dtaGetDataTypeIsEnumType(ssGetDataTypeAccess(S), ssGetPath(S),
-                                     elem_type) == 1) {
-
-          /* printf("%s\n",
-             dtaGetEnumTypeStringFromValue(ssGetDataTypeAccess(S), ssGetPath(S),
-             elem_type, *enum_value_in)); */
-          cbor_encode_text_stringz(&map_encoder,
-                                   ssGetBusElementName(S, dtype, i));
-          cbor_encode_int(&map_encoder, *enum_value_in);
-        }
+        /* Implementation for ENUMS */
+        // const int *enum_value_in =
+        //     (const int *)((const char *)input_port + offset);
+        // if (dtaGetDataTypeIsEnumType(ssGetDataTypeAccess(S), ssGetPath(S),
+        //                              elem_type) == 1) {
+        //
+        //   /* printf("%s\n",
+        //      dtaGetEnumTypeStringFromValue(ssGetDataTypeAccess(S), ssGetPath(S),
+        //      elem_type, *enum_value_in)); */
+        //   cbor_encode_text_stringz(&map_encoder,
+        //                            ssGetBusElementName(S, dtype, i));
+        //   cbor_encode_int(&map_encoder, *enum_value_in);
+        // }
         break;
       }
     }

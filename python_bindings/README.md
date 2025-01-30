@@ -21,3 +21,8 @@ Some examples require additional Python dependencies:
 
 Install them as needed ideally in your custom enviroment (e.g conda) before running the
 corresponding examples.
+
+## Handicaps
+The bindings require to have the same data types (i.e structs) as the original c library.
+We also need to use the same constants for `BUFFER_SIZE` and `CBOR_BUFFER_SIZE`, this is currently
+harcoded, but a better solution might be possible.

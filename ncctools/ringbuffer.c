@@ -9,6 +9,7 @@
 
 static NCCToolsMessage NULL_MSG = {.wait = true};
 
+/* Since buffer size its a power of 2 this bit manipulation its an optimization. */
 static unsigned int wrap(unsigned int idx) { return idx & (BUFFER_SIZE - 1); }
 
 void ncctools_publish(NCCToolsRingBuffer *ring_buffer, uint8_t *cbor_buffer,
